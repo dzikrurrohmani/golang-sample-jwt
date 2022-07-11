@@ -33,7 +33,11 @@ func main() {
 			if err != nil {
 				c.AbortWithStatus(401)
 				return
-
+			}
+			err = tokenService.StoreAccessToken(user.Username, token)
+			if err != nil {
+				c.AbortWithStatus(401)
+				return
 			}
 			c.JSON(200, gin.H{
 				"token": token,
@@ -47,12 +51,14 @@ func main() {
 	protectedGroup.GET("/customer", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "customer",
+			"data": ctx.GetString("user-id"),
 		})
 	})
 
 	protectedGroup.GET("/product", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "product",
+			"data": ctx.GetString("user-id"),
 		})
 	})
 
@@ -61,6 +67,7 @@ func main() {
 		panic(err)
 	}
 }
+
 // package main
 
 // import (

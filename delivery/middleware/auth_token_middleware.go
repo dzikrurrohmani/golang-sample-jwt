@@ -40,9 +40,8 @@ func (a *authTokenMiddleware) RequiredToken() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		fmt.Println(1)
 
-		token, err := a.acctToken.VerifyAccsessToken(tokenString)
+		token, err := a.acctToken.VerifyAccessToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Unauthrorized",
@@ -50,14 +49,24 @@ func (a *authTokenMiddleware) RequiredToken() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		userId, err := a.acctToken.FetchAccessToken(token)
+		if userId == "" || err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Unauthrorized",
+			})
+			c.Abort()
+			return
+		}
 		fmt.Println("token:", token)
-		if token!= nil {
+		if token != nil {
+			c.Set("user-id", userId)
 			c.Next()
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": "token invalid",
+				"message": "Unauthrorized",
 			})
 			c.Abort()
+			return
 		}
 
 	}
